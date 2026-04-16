@@ -1,0 +1,17 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container">
+  <h1>Bienvenido de vuelta a {{name}}</h1>
+  <p>
+    Este proyecto fue construido usando las siguientes tecnologías:
+    <span class="tech">Flask</span>, <span class="tech">Python</span> y
+    <span class="tech">HTML</span>, <span class="tech">CSS</span>
+  </p>
+  <ul>
+    {% for tech in techs %}
+    <li class="tech">{{tech}}</li>
+
+    {% endfor %}
+  </ul>
+</div>
+
+{% endblock %}

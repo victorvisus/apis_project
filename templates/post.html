@@ -1,0 +1,41 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container">
+  <h1>{{name}}</h1>
+  <p>{{path}}</p>
+  <form action="{{ url_for('store_student') }}" method="POST">
+    <div>
+      <input type="text" name="name" placeholder="Nombre" required />
+    </div>
+    <div>
+      <input type="text" name="country" placeholder="País" />
+    </div>
+    <div>
+      <input type="text" name="city" placeholder="Ciudad" required />
+    </div>
+    <div>
+      <input
+        type="date"
+        name="birthyear"
+        placeholder="Fecha de nacimiento"
+        required
+      />
+    </div>
+    <div>
+      <input type="text" name="skills" placeholder="Skills" />
+    </div>
+    <div>
+      <textarea
+        type="text"
+        name="bio"
+        placeholder="Biografía"
+        required
+      ></textarea>
+    </div>
+
+    <div>
+      <button type="submit">Enviar</button>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

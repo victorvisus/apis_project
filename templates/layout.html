@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      href="https://fonts.googleapis.com/css?family=Lato:300,400|Nunito:300,400|Raleway:300,400&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    {% if title %}
+    <title>API Project - {{ title}}</title>
+    {% else %}
+    <title>API Project</title>
+    {% endif %}
+  </head>
+
+  <body>
+    <header>
+      <div class="menu-container">
+        <div>
+          <a class="brand-name nav-link" href="/">API Project: Students</a>
+        </div>
+        <ul class="nav-lists">
+          <li class="nav-list">
+            <a class="nav-link active" href="{{ url_for('home') }}">Inicio</a>
+          </li>
+          <li class="nav-list">
+            <a class="nav-link active" href="{{ url_for('about') }}">Acerca</a>
+          </li>
+          <li class="nav-list">
+            <a class="nav-link active" href="{{ url_for('post') }}"
+              >Publicaciones</a
+            >
+          </li>
+        </ul>
+      </div>
+    </header>
+    <main>{% block content %} {% endblock %}</main>
+  </body>
+</html>
+
+<!-- En el diseño anterior, hemos creado una plantilla común que puede ser utilizada por todas las páginas que heredan de ella. Dentro del diseño, podemos ver los enlaces de navegación. Usamos las etiquetas block content y endblock  para permitir que las subplantillas agreguen contenido. -->

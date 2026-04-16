@@ -1,0 +1,13 @@
+{% extends 'layout.html' %} {% block content %}
+<div class="container">
+  <h1>Datos del formulario</h1>
+  <ul>
+    <li>Nombre: {{result_data.first_name}}</li>
+    <li>Apellido: {{result_data.last_name}}</li>
+    <li>Trabajo anterior: {{result_data.old_job}}</li>
+    <li>Trabajo actual: {{result_data.current_job}}</li>
+    <li>País: {{result_data.country}}</li>
+  </ul>
+</div>
+
+{% endblock %}
