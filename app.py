@@ -3,97 +3,114 @@
 import os
 
 import certifi
-from bson import json_util
+from bson import ObjectId, json_util
 from dotenv import load_dotenv
 from flask import Flask, Response, render_template
 from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 
-# //////////////////////////////////////////////////////////////////////////////////////////    BASE DE DATOS    //// #
+# ////////////////////////////////////////////////////////////////////////   BASE DE DATOS    //// #
 
 load_dotenv()
 ca = certifi.where()
 
 MONGO_URI = os.environ.get("MONGO_URI")
-# Create a new client and connect to the server
-client = MongoClient(MONGO_URI, server_api=ServerApi("1"), tlsCAFile=ca)
+BBDD = os.environ.get("BBDD")
 
-# Send a ping to confirm a successful connection
+
+con = MongoClient(MONGO_URI, server_api=ServerApi("1"), tlsCAFile=ca)
+if not BBDD:
+    raise ValueError("BBDD environment variable is not set")
+
 try:
-    client.admin.command("ping")
-    print("Pinged your deployment. You successfully connected to MongoDB!")
+    db = con[BBDD]
 
+    # Send a ping to confirm a successful connection
+    con.admin.command("ping")
+    print("Pinged your deployment. You successfully connected to MongoDB!")
+except ValueError as e:
+    print(e)
 except Exception as e:
     print(e)
 
-# CREAR BASE DE DATOS: db = client["thirty_days_of_python"]
-db = client.thirty_days_of_python  # la primera vez se crea la base de datos
 
-
-# /////////////////////////////////////////////////////////////////////////////////////////////////    MODELO    //// #
-def obtenerDatos():
+# //////////////////////////////////////////////////////////////////////////////    MODELO    //// #
+def fetch_all_data():
     data_list = list(db.students.find())
     data_list = json_util.dumps(data_list, indent=4)
-    print(data_list)
+    # print(data_list)
     return data_list
+
+
+def fetch_student_by_id(id):
+    student = db.students.find({"_id": ObjectId(id)})
+    return json_util.dumps(student)
+
+
+def insert_student_document(document):
+    db.students.insert_one(document)
+    print("Documento insertado correctamente")
 
 
 # independientemente del navegador, se prueba que funciona bien
 # el fetch desde el modelo:
-# losEstudiantes = obtenerDatos()
+# print(fetch_all_data())
 
 
-# //////////////////////////////////////////////////////////////////////////////////////////////////    VISTA    //// #
+# ///////////////////////////////////////////////////////////////////////////////    VISTA    //// #
 
 app = Flask(__name__)
 
 
 @app.route("/")  # este decorador crea la ruta de inicio
-def home():
+def index():
     """
     Esta función es llamada cuando se ingresa a la ruta principal
-    de la aplicación. Renderiza la plantilla home.html con
+    de la aplicación. Renderiza la plantilla index.html con
     los datos necesarios para mostrar la página principal.
     """
     techs = ["HTML", "CSS", "Flask", "Python"]
     name = "API Project, testeando las APIs"
     return render_template(
-        "home.html", techs=techs, name=name, title="Página principal"
+        "index.html", techs=techs, name=name, title="Página principal"
     )
 
 
 @app.route("/about")
 def about():
+    """
+    Esta función es llamada cuando se ingresa a la ruta /about. Renderiza la
+    plantilla about.html con los datos necesarios para mostrar la página
+    de acerca de nosotros.
+    """
     name = "Sobre Nosotros"
     return render_template("about.html", name=name, title="Acerca de nosotros")
 
 
-@app.route("/post", methods=["GET"])
-def post():
+@app.route("/formulario", methods=["GET"])
+def formulario():
+    """
+    Esta función es llamada cuando se ingresa a la ruta /formulario. Renderiza la
+    plantilla formulario.html con los datos necesarios para mostrar el formulario.
+    """
     name = "Formulario"
-    return render_template("post.html", name=name, title="Formulario")
+    return render_template("formulario.html", name=name, title="Formulario")
 
 
 @app.route("/result", methods=["POST"])
 def result():
-    """first_name = request.form["first_name"]
-    last_name = request.form["last_name"]
-    old_job = request.form["old_job"]
-    current_job = request.form["current_job"]
-    country = request.form["country"]
-    print(first_name, last_name, old_job, current_job, country)
-    result_data = {
-        "first_name": first_name,
-        "last_name": last_name,
-        "old_job": old_job,
-        "current_job": current_job,
-        "country": country,
-    }"""
+    """
+    Muestra el resultado de los datos recogidos en el formulario en la plantilla result.html.
+
+    Returns:
+        Response -- objeto de respuesta con el resultado del formulario en formato HTML
+    """
+
     result_data = {}
     return render_template("result.html", result_data=result_data, title="Resultado")
 
 
-# ////////////////////////////////////////////////////////////////////////////////////////////    CONTROLADOR    //// #
+# /////////////////////////////////////////////////////////////////////////    CONTROLADOR    //// #
 
 
 @app.route("/api/v1.0/students", methods=["GET"])
@@ -104,12 +121,12 @@ def api_students():
     Returns:
         Response -- objeto de respuesta con los datos de los estudiantes en formato JSON
     """
-    return Response(obtenerDatos(), mimetype="application/json")
+    return Response(fetch_all_data(), mimetype="application/json")
 
 
 @app.route("/students/result", methods=["POST"])
 def store_student():
-    print("hellouuu")
+    return "hellouuu"
 
 
 if __name__ == "__main__":

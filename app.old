@@ -9,11 +9,11 @@ app = Flask(__name__)
 
 
 @app.route("/")  # este decorador crea la ruta de inicio
-def home():
+def index():
     """techs = ["HTML", "CSS", "Flask", "Python"]
     name = "30 días de desafío de programación en Python"
     return render_template(
-        "home.html", techs=techs, name=name, title="Página principal"
+        "index.html", techs=techs, name=name, title="Página principal"
     )"""
     return render_template("index.html")
 

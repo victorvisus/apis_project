@@ -69,16 +69,16 @@ app = Flask(__name__)
 
 
 @app.route("/")  # este decorador crea la ruta de inicio
-def home():
+def index():
     """
     Esta función es llamada cuando se ingresa a la ruta principal
-    de la aplicación. Renderiza la plantilla home.html con
+    de la aplicación. Renderiza la plantilla index.html con
     los datos necesarios para mostrar la página principal.
     """
     techs = ["HTML", "CSS", "Flask", "Python"]
     name = "API Project, testeando las APIs"
     return render_template(
-        "home.html", techs=techs, name=name, title="Página principal"
+        "index.html", techs=techs, name=name, title="Página principal"
     )
 
 
@@ -88,10 +88,10 @@ def about():
     return render_template("about.html", name=name, title="Acerca de nosotros")
 
 
-@app.route("/post", methods=["GET"])
-def post():
+@app.route("/formulario", methods=["GET"])
+def formulario():
     name = "Formulario"
-    return render_template("post.html", name=name, title="Formulario")
+    return render_template("formulario.html", name=name, title="Formulario")
 
 
 ################################################################
