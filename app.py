@@ -1,33 +1,27 @@
 # importar flask
 
+import datetime
 import os
 
-import certifi
 from bson import ObjectId, json_util
 from dotenv import load_dotenv
-from flask import Flask, Response, render_template
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
+from flask import Flask, Response, render_template, request
+
+import gest_db.gestores as gest
+
+# importo la conexxion a la BBDD
+from gest_db.conexion import connect_to_db
 
 # ////////////////////////////////////////////////////////////////////////   BASE DE DATOS    //// #
 
 load_dotenv()
-ca = certifi.where()
-
 MONGO_URI = os.environ.get("MONGO_URI")
-BBDD = os.environ.get("BBDD")
-
-
-con = MongoClient(MONGO_URI, server_api=ServerApi("1"), tlsCAFile=ca)
-if not BBDD:
-    raise ValueError("BBDD environment variable is not set")
+DATABASE_NAME = os.environ.get("DATABASE_NAME")
 
 try:
-    db = con[BBDD]
-
-    # Send a ping to confirm a successful connection
-    con.admin.command("ping")
-    print("Pinged your deployment. You successfully connected to MongoDB!")
+    db = connect_to_db(MONGO_URI, DATABASE_NAME)
+    if db is not None:
+        print(f"✅ Conectado con éxito a la base de datos: {DATABASE_NAME}")
 except ValueError as e:
     print(e)
 except Exception as e:
@@ -35,21 +29,16 @@ except Exception as e:
 
 
 # //////////////////////////////////////////////////////////////////////////////    MODELO    //// #
-def fetch_all_data():
-    data_list = list(db.students.find())
+def fetch_all_data(_db):
+    data_list = list(_db.students.find())
     data_list = json_util.dumps(data_list, indent=4)
     # print(data_list)
     return data_list
 
 
-def fetch_student_by_id(id):
-    student = db.students.find({"_id": ObjectId(id)})
+def fetch_student_by_id(_db, _id):
+    student = _db.students.find({"_id": ObjectId(_id)})
     return json_util.dumps(student)
-
-
-def insert_student_document(document):
-    db.students.insert_one(document)
-    print("Documento insertado correctamente")
 
 
 # independientemente del navegador, se prueba que funciona bien
@@ -97,19 +86,6 @@ def formulario():
     return render_template("formulario.html", name=name, title="Formulario")
 
 
-@app.route("/result", methods=["POST"])
-def result():
-    """
-    Muestra el resultado de los datos recogidos en el formulario en la plantilla result.html.
-
-    Returns:
-        Response -- objeto de respuesta con el resultado del formulario en formato HTML
-    """
-
-    result_data = {}
-    return render_template("result.html", result_data=result_data, title="Resultado")
-
-
 # /////////////////////////////////////////////////////////////////////////    CONTROLADOR    //// #
 
 
@@ -121,12 +97,29 @@ def api_students():
     Returns:
         Response -- objeto de respuesta con los datos de los estudiantes en formato JSON
     """
-    return Response(fetch_all_data(), mimetype="application/json")
+    return Response(fetch_all_data(db), mimetype="application/json")
 
 
-@app.route("/students/result", methods=["POST"])
+@app.route("/result", methods=["POST"])
 def store_student():
-    return "hellouuu"
+    name = request.form["name"]
+    country = request.form["country"]
+    city = request.form["city"]
+    skills = request.form["skills"].split(", ")
+    bio = request.form["bio"]
+    birthyear = request.form["birthyear"]
+    created_at = datetime.datetime.now()
+    student = {
+        "name": name,
+        "country": country,
+        "city": city,
+        "birthyear": birthyear,
+        "skills": skills,
+        "bio": bio,
+        "created_at": created_at,
+    }
+    gest.insert_document(db, "students", student)
+    return render_template("result.html", result_data=student, title="Resultado")
 
 
 if __name__ == "__main__":
